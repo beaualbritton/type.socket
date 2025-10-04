@@ -11,6 +11,7 @@
   },
   "scripts":
   {
-    "start":"bun source/index.ts"
-  }
+    "server":"bun source/server/index.ts",
+    "client":"bun source/client/index.ts",
+  },
 }
