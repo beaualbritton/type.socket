@@ -1,4 +1,6 @@
-# typescript
+# type-socket
+
+simple terminal-based chatroom using Bun & WebSockets. supports multiple clients on one server.
 
 To install dependencies:
 
@@ -9,7 +11,6 @@ bun install
 To run:
 
 ```bash
-bun run index.ts
+bun run start
 ```
 
-This project was created using `bun init` in bun v1.2.23. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
