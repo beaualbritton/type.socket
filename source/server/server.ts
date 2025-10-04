@@ -1,11 +1,11 @@
 import type { ServerWebSocket } from "bun";
-import type { ClientSession } from "../client/session";
+import type { ClientSession } from "./session";
 
 export class Server
 {
   private server!: Bun.Server;
-  private clients: Map<ServerWebSocket, ClientSession> = new Map();
-  private clientCount : number = 0;
+  private clients: Map<ServerWebSocket<{username: string}>, ClientSession> = new Map();
+
   start(port: number)
   {
     this.server = Bun.serve({
@@ -16,14 +16,23 @@ export class Server
         close: this.onClose.bind(this),
         publishToSelf: false,
       },
-      fetch: (req,server) => {server.upgrade(req)},
+      fetch: (req,server) =>
+      {
+        const url = new URL(req.url); 
+        let username = url.searchParams.get("username") || "guest";
+        if(server.upgrade(req, {data: {username:username}}))
+        {
+          return;
+        };
+      },
     });
     console.log("Hi! Server running")
   }
 
-  private onOpen(ws: Bun.ServerWebSocket)
+  private onOpen(ws: Bun.ServerWebSocket<{username: string}>)
   {
-    const username = `user_${this.clientCount++}`
+    let username = ws.data.username;
+
     const session:ClientSession=
     {
         ws: ws,
@@ -40,7 +49,7 @@ export class Server
     ws.publish("room", `${username} joined the room`);
   }
 
-  private onMessage(ws: Bun.ServerWebSocket, message: string)
+  private onMessage(ws: Bun.ServerWebSocket<{username: string}>, message: string)
   {
     const session = this.clients.get(ws);
     if (!session) return;
@@ -51,7 +60,7 @@ export class Server
     ws.publish("room", `${session.username}: ${message}`);
   }
 
-  private onClose(ws: Bun.ServerWebSocket)
+  private onClose(ws: Bun.ServerWebSocket<{username: string}>)
   {
     const session = this.clients.get(ws);
     if (!session) return;

@@ -1,6 +1,6 @@
 export type ClientSession =
 {
-  ws: Bun.ServerWebSocket;
+  ws: Bun.ServerWebSocket<{username: string}>;
   username: string;
   subs: Set<string>;
 };
